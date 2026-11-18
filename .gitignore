@@ -1,0 +1,38 @@
+# Data & models — NEVER commit these!
+data/
+models/
+*.pt
+*.pth
+*.onnx
+*.joblib
+*.pkl
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
