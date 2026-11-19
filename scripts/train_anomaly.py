@@ -27,10 +27,8 @@ def main():
     Path(data_cfg["scalers"]).mkdir(exist_ok=True)
 
     # ─── Step 1: Load YOUR Normal Data ───
-    # REPLACE THIS with your actual data loading
-    # X shape: [num_samples, 80] — all NORMAL traffic
     print("[INFO] Loading normal training data...")
-    # DUMMY DATA — replace with real baseline traffic
+    # DUMMY DATA — replace with real baseline traffic later
     X_train = np.random.randn(10000, cfg["input_dim"]).astype(np.float32)
     X_val = np.random.randn(1000, cfg["input_dim"]).astype(np.float32)
 
@@ -103,7 +101,7 @@ def main():
 
     percentile = cfg["threshold_percentile"]
     threshold = np.percentile(mse, percentile)
-    print(f"[RESULT] Threshold ({percentile}th percentile): {threshold:.6f}")
+    print(f"\n[RESULT] Threshold ({percentile}th percentile): {threshold:.6f}")
     print(f"         → Values ABOVE {threshold:.6f} = ANOMALY")
 
 
