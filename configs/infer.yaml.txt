@@ -1,0 +1,17 @@
+# ==============================================
+# Inference Configuration
+# ==============================================
+
+runtime:
+  providers: ["CPUExecutionProvider"]
+  batch_size: 1
+  timeout_ms: 5000
+
+api:
+  host: "0.0.0.0"
+  port: 8000
+  log_level: "info"
+
+thresholds:
+  anomaly_mse: 0.025
+  malware_confidence: 0.5

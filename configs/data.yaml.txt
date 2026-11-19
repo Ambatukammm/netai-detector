@@ -1,0 +1,14 @@
+# ==============================================
+# Data Configuration
+# ==============================================
+
+paths:
+  raw_data: "../data/raw/"
+  processed_data: "../data/processed/"
+  models: "../models/"
+  scalers: "../models/scalers/"
+
+features:
+  network_features: 80
+  malware_features: 256
+  scaler_type: "standard"

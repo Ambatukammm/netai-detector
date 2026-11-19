@@ -1,0 +1,111 @@
+"""
+Train Anomaly Autoencoder on NORMAL data only
+"""
+import sys
+import yaml
+import numpy as np
+import torch
+import torch.nn as nn
+from pathlib import Path
+
+# Add src to path
+sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
+
+from netai_detector.models.autoencoder import AnomalyAutoencoder
+from netai_detector.features.scaler import FeatureScaler
+
+
+def main():
+    # Load config
+    with open("configs/model.yaml") as f:
+        cfg = yaml.safe_load(f)["anomaly"]
+    with open("configs/data.yaml") as f:
+        data_cfg = yaml.safe_load(f)["paths"]
+
+    # Create output dirs
+    Path(data_cfg["models"]).mkdir(exist_ok=True)
+    Path(data_cfg["scalers"]).mkdir(exist_ok=True)
+
+    # ─── Step 1: Load YOUR Normal Data ───
+    # REPLACE THIS with your actual data loading
+    # X shape: [num_samples, 80] — all NORMAL traffic
+    print("[INFO] Loading normal training data...")
+    # DUMMY DATA — replace with real baseline traffic
+    X_train = np.random.randn(10000, cfg["input_dim"]).astype(np.float32)
+    X_val = np.random.randn(1000, cfg["input_dim"]).astype(np.float32)
+
+    # ─── Step 2: Fit & Apply Scaler ───
+    print("[INFO] Fitting scaler...")
+    scaler = FeatureScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_val_scaled = scaler.transform(X_val)
+
+    # Save scaler — CRITICAL for inference!
+    scaler.save(Path(data_cfg["scalers"]) / "anomaly_scaler.joblib")
+    print("[SAVED] scaler → models/scalers/anomaly_scaler.joblib")
+
+    # ─── Step 3: Convert to Tensors ───
+    X_train_tensor = torch.tensor(X_train_scaled)
+    X_val_tensor = torch.tensor(X_val_scaled)
+
+    # ─── Step 4: Model Setup ───
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"[INFO] Training on: {device}")
+
+    model = AnomalyAutoencoder(
+        input_dim=cfg["input_dim"],
+        latent_dim=cfg["latent_dim"],
+        hidden_dim=cfg["hidden_dim"]
+    ).to(device)
+
+    criterion = nn.MSELoss()
+    optimizer = torch.optim.Adam(model.parameters(), lr=cfg["learning_rate"])
+
+    # ─── Step 5: Training Loop ───
+    batch_size = cfg["batch_size"]
+    epochs = cfg["epochs"]
+
+    print(f"[INFO] Starting training: {epochs} epochs")
+    model.train()
+    for epoch in range(epochs):
+        perm = torch.randperm(len(X_train_tensor))
+        epoch_loss = 0.0
+        for i in range(0, len(X_train_tensor), batch_size):
+            idx = perm[i:i+batch_size]
+            xb = X_train_tensor[idx].to(device)
+
+            optimizer.zero_grad()
+            output = model(xb)
+            loss = criterion(output, xb)
+            loss.backward()
+            optimizer.step()
+            epoch_loss += loss.item()
+
+        # Validation
+        model.eval()
+        with torch.no_grad():
+            val_out = model(X_val_tensor.to(device))
+            val_loss = criterion(val_out, X_val_tensor.to(device)).item()
+        model.train()
+
+        print(f"  Epoch {epoch+1:02d} | Train Loss: {epoch_loss:.6f} | Val Loss: {val_loss:.6f}")
+
+    # ─── Step 6: Save Model ───
+    model_path = Path(data_cfg["models"]) / "anomaly_model.pt"
+    torch.save(model.state_dict(), model_path)
+    print(f"[SAVED] Model → {model_path}")
+
+    # ─── Step 7: Calculate Threshold ───
+    model.eval()
+    with torch.no_grad():
+        reconstructions = model(X_val_tensor.to(device)).cpu().numpy()
+        mse = np.mean(np.power(X_val_scaled - reconstructions, 2), axis=1)
+
+    percentile = cfg["threshold_percentile"]
+    threshold = np.percentile(mse, percentile)
+    print(f"[RESULT] Threshold ({percentile}th percentile): {threshold:.6f}")
+    print(f"         → Values ABOVE {threshold:.6f} = ANOMALY")
+
+
+if __name__ == "__main__":
+    main()

@@ -1,0 +1,20 @@
+# ==============================================
+# Model Configuration
+# ==============================================
+
+anomaly:
+  input_dim: 80
+  latent_dim: 10
+  hidden_dim: 40
+  learning_rate: 0.001
+  batch_size: 64
+  epochs: 50
+  threshold_percentile: 99.9
+
+malware:
+  input_dim: 256
+  hidden_dim: 128
+  num_classes: 2
+  learning_rate: 0.001
+  batch_size: 64
+  epochs: 30
