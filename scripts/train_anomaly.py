@@ -34,7 +34,9 @@ if DATA_FILE.exists():
     X_train = np.load(DATA_FILE)
 else:
     print("[INFO] No traffic data found — starting live capture...")
-    from scripts.live_capture import capture_training_data
+    import sys
+sys.path.insert(0, str(Path(__file__).parent))
+from live_capture import capture_training_data
     X_train = capture_training_data(duration=300)  # 5 minutes
     
     if X_train is None or len(X_train) < 10:
