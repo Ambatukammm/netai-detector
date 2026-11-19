@@ -1,0 +1,28 @@
+# ┌─────────────────────────────────────────────┐
+# │     NetAI Anomaly Detector — Config          │
+# └─────────────────────────────────────────────┘
+
+project:
+  name: netai-detector
+  version: "1.0.0"
+
+paths:
+  project_root: .
+  data: data/raw
+  models: models/
+  scalers: models/scalers/
+  exports: exports/
+
+model:
+  input_dim: 80
+  latent_dim: 10
+  hidden_dim: 40
+  epochs: 50
+  batch_size: 32
+  learning_rate: 0.001
+  threshold_percentile: 99.9
+
+inference:
+  host: "0.0.0.0"
+  port: 8000
+  log_predictions: true
