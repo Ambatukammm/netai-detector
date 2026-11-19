@@ -1,6 +1,6 @@
 """
-NetAI Detector — One-Click Master Script
-Runs: Train → Export ONNX → Start API
+NetAI Detector — FULL AUTO
+Capture traffic → Train model → Start API — ONE CLICK
 """
 import sys
 import subprocess
@@ -19,18 +19,18 @@ def run_step(name, cmd):
     print(f"✅ {name} — COMPLETE")
 
 if __name__ == "__main__":
-    print("🚀 NETAI DETECTOR — ONE-CLICK LAUNCH")
-    print(f"📂 Project: {PROJECT_ROOT}")
+    print("🚀 NETAI DETECTOR — FULL AUTO MODE")
+    print("==========================================")
+    print("1. Capture normal traffic (5 min)")
+    print("2. Train anomaly detector")
+    print("3. Start detection API")
+    print("==========================================\n")
     
-    # Step 1: Train
-    run_step("TRAINING", "python scripts/train_anomaly.py")
+    run_step("CAPTURE TRAFFIC", "python scripts/live_capture.py train")
+    run_step("TRAIN MODEL", "python scripts/train_anomaly.py")
     
-    # Step 2: Export to ONNX
-    run_step("EXPORTING ONNX", "python scripts/export_onnx.py")
-    
-    # Step 3: Start API Server
     print(f"\n{'='*60}")
-    print("🌐 STARTING API SERVER — Press Ctrl+C to stop")
+    print("🌐 STARTING DETECTION API")
     print(f"   Local:   http://localhost:8000")
     print(f"   Docs:    http://localhost:8000/docs")
     print(f"{'='*60}\n")
